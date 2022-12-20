@@ -22,7 +22,7 @@ def render(t: ti.f32):
     for i, j in pixels:
         x = (ti.cast(i, ti.f32)/res_x - 0.5) * 2
         # y = 8*(ti.sin(x/8))+res_y/2
-        y = x
+        y = ti.sin(x*3+t)/3
         y_j = (ti.cast(j, ti.f32)/res_y - 0.5) * 2
         pct = plot(y, y_j)
         color = ti.Vector([0.0, 0.0, 0.0])
