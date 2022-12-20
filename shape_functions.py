@@ -1,7 +1,3 @@
-
-# plot math functions
-# canvas mapped to [-1, 1]
-
 import taichi as ti
 import handy_shader_functions as hsf
 
@@ -13,25 +9,34 @@ pixels = ti.Vector.field(3, ti.f32, shape=(res_x, res_y))
 
 
 @ti.func
-def plot(a: ti.f32, b: ti.f32):
-    return hsf.smoothstep(0.02, 0, ti.abs(a-b))
+def rect():
+    pass
 
 
 @ti.func
-def rect()
+def line(a: ti.f32, b: ti.f32, u: ti.f32, v: ti.f32):
+    # todo: exchange 1 and 0
+    return 0.0 if (hsf.step(a, u) - hsf.step(b, u) == 1.0) else 1.0
 
 
 @ti.kernel
 def render(t: ti.f32):
     # draw something on your canvas
     for i, j in pixels:
-        x = (ti.cast(i, ti.f32)/res_x - 0.5) * 2
-        # y = 8*(ti.sin(x/8))+res_y/2
-        y = ti.sin(x*3+t)/3
-        y_j = (ti.cast(j, ti.f32)/res_y - 0.5) * 2
-        pct = plot(y, y_j)
-        color = ti.Vector([0.0, 0.0, 0.0])
-        color += pct*ti.Vector([0.0, 1.0, 0.0])
+        # Trans the short side to [-1, 1]
+        u = ti.cast(i, ti.f32)/res_x*2 - 1.0
+        v = ti.cast(j, ti.f32)/res_y*2 - 1.0
+        if res_x > res_y:
+            u *= res_x / res_y
+        else:
+            v *= res_y / res_x
+        # init your canvas to black
+        color = ti.Vector([ti.abs(u), ti.abs(v), ti.sin(t)*2 - 1.0])
+        left = hsf.step(-0.9, u)
+        bottom = hsf.step(-0.9, v)
+        color *= left
+        color *= bottom
+        color *= line(0.4, 0.5, u, v)
         pixels[i, j] = color
 
 
